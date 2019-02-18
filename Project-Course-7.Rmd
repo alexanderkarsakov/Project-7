@@ -1,0 +1,94 @@
+---
+title: "Project 7"
+author: "Alex"
+date: "18/02/2019"
+output:
+  word_document: default
+  pdf_document: default
+---
+
+
+# Regression Models Course 7 Project 
+
+## Instructions
+
+We work for Motor Trend, a magazine about the automobile industry. We are interested in exploring the relationship between a set of variables and miles per gallon (MPG) (outcome). We are particularly interested in the following two questions:
+
+- Is an automatic or manual transmission better for MPG
+- Quantify the MPG difference between automatic and manual transmissions
+
+
+## Data analysis
+
+```{r}
+library(knitr)
+```
+
+```{r}
+data(mtcars)
+str(mtcars)  
+```
+
+
+```{r}
+mtcars$cyl <- factor(mtcars$cyl)
+mtcars$vs <- factor(mtcars$vs, labels=c("V-engine", "Straight engine"))
+mtcars$gear <- factor(mtcars$gear)
+mtcars$carb <- factor(mtcars$carb)
+mtcars$am <- factor(mtcars$am,labels=c('Automatic','Manual'))
+```
+
+We can fit a linear model, initially using all variables and see if we get results which are usable. When looking at the summary, we can see that we get high p-values for all variables, suggesting that this model is not such a good fit. We choose a better model by using a step wise algorithm, in backward direction (i.e. remove candidates from the fit).
+
+```{r, results="hide"}
+vars.all <- lm(mpg ~ ., data = mtcars)
+vars.best.fit <- step(vars.all, direction = "backward")
+```
+
+```{r}
+summary(vars.best.fit)
+```
+
+## Executive Summary
+
+We can summarize, that most of variables like (cylinder 16, cylinder 18, horsepower, weight and manual transmision) have pretty low p-values (< 0.05), which increases our confidence in the model. Additionally, we see that the R-squared values are pretty high, that is around 84 percent of the in- or decrease in milage per gallon is explained by our model. Finally, we see that the 1st and 3rd quantiles of the residuals are about the same as `1.5 +/- std error` given a strong hint that the residuals are normally distributed. This observation is further strengthened by the normal q-q plot (see appendix), though there some outliers become apparent.
+From this model, we see that we can expect an `1.8092` increase in mpg when changing from automatic to manual, keeping all other variables fixed. This suggests that having a manual car is better for mpg. To further test this hypothesis, we perform a t-test:
+
+```{r, results="hide"}
+t.test(mpg ~ am, data = mtcars)
+```
+
+Now we can make a 95% confidence interval to find the values below. This includes a possible decrease, which shows that just switching from automatic to manual is not to be sure (with earlier mentioned confidence) that it will actually increase milage.
+
+```{r}
+confint(vars.best.fit)["amManual",]
+```
+
+## Plots 
+
+```{r}
+str(mtcars)
+```
+
+```{r, results="hide"}
+pairs(mpg ~ ., data=mtcars)
+```
+
+```{r, results="hide"}
+par(mfrow=c(2,2))
+plot(vars.best.fit)
+```
+
+```{r}
+t.test(mpg ~ am, data = mtcars)
+```
+
+
+
+
+
+
+
+
+
+
